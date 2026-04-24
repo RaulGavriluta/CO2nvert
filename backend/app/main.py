@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from app.database import Base, engine
-from app.api import upload, extraction
-
+from app.api import upload, extraction, batches, documents
 from app.models import (
     Batch,
     Document,
@@ -20,6 +19,8 @@ app = FastAPI(
 
 app.include_router(upload.router)
 app.include_router(extraction.router)
+app.include_router(batches.router)
+app.include_router(documents.router)
 
 Base.metadata.create_all(bind=engine)
 
