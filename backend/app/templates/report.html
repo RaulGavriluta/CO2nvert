@@ -2,206 +2,481 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>CO2nvert Emissions Report</title>
+    <title>CO2nvert Carbon Report</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-body {
-    font-family: Arial, sans-serif;
-    color: #1f2937;
-    font-size: 12px;
-    line-height: 1.5;
-}
+        body {
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 0;
+        }
 
-.cover {
-    text-align: center;
-    padding-top: 120px;
-    page-break-after: always;
-}
+        .page {
+            page-break-after: always;
+            padding: 36px;
+        }
 
-h1 {
-    font-size: 42px;
-    color: #064e3b;
-}
+        .cover {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(120deg, #14532d 0%, #14532d 42%, #f8fafc 42%, #f8fafc 100%);
+            color: white;
+            padding: 60px;
+        }
 
-h2 {
-    color: #047857;
-    border-bottom: 1px solid #d1d5db;
-    padding-bottom: 6px;
-    margin-top: 28px;
-}
+        .cover-box {
+            max-width: 420px;
+        }
 
-.kpi {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    padding: 16px;
-    font-size: 18px;
-    margin: 16px 0;
-}
+        .cover h1 {
+            font-size: 52px;
+            margin: 0 0 12px;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 12px;
-}
+        .cover h2 {
+            font-size: 30px;
+            margin: 0 0 24px;
+            color: white;
+            border: none;
+        }
 
-th {
-    background: #d1fae5;
-}
+        .cover p {
+            font-size: 18px;
+        }
 
-th, td {
-    border: 1px solid #d1d5db;
-    padding: 6px;
-    vertical-align: top;
-}
+        h1, h2, h3 {
+            color: #b91c1c;
+        }
 
-.warning {
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    padding: 10px;
-}
-</style>
+        h2 {
+            font-size: 24px;
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 17px;
+            margin-top: 24px;
+        }
+
+        .toc ol {
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .kpi {
+            border: 1px solid #e5e7eb;
+            padding: 14px;
+            background: #f9fafb;
+        }
+
+        .kpi .label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .kpi .value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #064e3b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+
+        th {
+            background: #b91c1c;
+            color: white;
+            text-align: left;
+        }
+
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 7px;
+            vertical-align: top;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .chart-card {
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            background: #ffffff;
+            min-height: 300px;
+        }
+
+        .chart-card-wide {
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            background: #ffffff;
+            margin-top: 28px;
+            min-height: 320px;
+        }
+
+        .chart-title {
+            text-align: center;
+            color: #b91c1c;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 14px 0;
+        }
+
+        .methodology-box {
+            border-left: 4px solid #047857;
+            padding: 10px 14px;
+            background: #ecfdf5;
+            margin: 12px 0;
+        }
+
+        ul {
+            padding-left: 18px;
+        }
+
+        .footer-note {
+            font-size: 10px;
+            color: #6b7280;
+            margin-top: 32px;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 260px;
+        }
+    </style>
 </head>
+
 <body>
 
 <section class="cover">
-    <h1>CO2nvert</h1>
-    <h2>Raport anual simplificat privind emisiile GES</h2>
-    <p>{{ company_name }}</p>
-    <p>Perioada de raportare: {{ reporting_period }}</p>
-    <p>Generat la: {{ generated_at }}</p>
-</section>
-
-<section>
-    <h2>1. Rezumat executiv</h2>
-    <p>
-        Raportul centralizează emisiile calculate automat pe baza documentelor încărcate,
-        valorilor extrase prin OCR și factorilor de emisie configurați în aplicație.
-    </p>
-
-    <div class="kpi">
-        <strong>Total emisii:</strong>
-        {{ total_co2e_tonnes }} tCO₂e
+    <div class="cover-box">
+        <h1>CO2nvert</h1>
+        <h2>Raport privind amprenta de carbon</h2>
+        <p>An financiar {{ reporting_period }}</p>
+        <p>{{ company_name }}</p>
     </div>
 </section>
 
-<section>
-    <h2>2. Emisii pe Scope</h2>
+<section class="page toc">
+    <h2>Cuprins</h2>
+    <ol>
+        <li>Introducere</li>
+        <li>Categorii de emisii</li>
+        <li>Total emisii gaze cu efect de seră</li>
+        <li>Diagrame emisii</li>
+        <li>Metodologie calcul amprenta de carbon</li>
+        <li>Limitări</li>
+        <li>Idei pentru reducerea amprentei de carbon</li>
+        <li>Anexă tehnică</li>
+    </ol>
+</section>
+
+<section class="page">
+    <h2>Introducere</h2>
+
+    <p>
+        Prezentul raport centralizează emisiile de gaze cu efect de seră estimate pentru
+        {{ company_name }} în perioada de raportare {{ reporting_period }}.
+        Datele au fost obținute prin procesarea automată a documentelor încărcate,
+        extragerea valorilor relevante prin OCR și aplicarea factorilor de emisie configurați.
+    </p>
+
+    <p>
+        Emisiile sunt exprimate în echivalent dioxid de carbon, CO₂e, și sunt structurate
+        conform abordării Scope 1, Scope 2 și Scope 3.
+    </p>
+
+    <div class="note">
+        {{ ai_summary }}
+    </div>
+
+    <h2>Categorii de emisii</h2>
+
+    <p>
+        <strong>Scope 1</strong> include emisiile directe provenite din surse controlate de companie,
+        precum combustibilul utilizat de flotă sau gazele naturale.
+    </p>
+
+    <p>
+        <strong>Scope 2</strong> include emisiile indirecte generate de energia achiziționată,
+        precum electricitatea sau energia termică.
+    </p>
+
+    <p>
+        <strong>Scope 3</strong> include alte emisii indirecte din lanțul valoric, precum deșeuri,
+        naveta angajaților sau călătoriile de afaceri.
+    </p>
+</section>
+
+<section class="page">
+    <h2>Total emisii gaze cu efect de seră</h2>
+
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="label">Total emisii</div>
+            <div class="value">{{ total_co2e_tonnes }} tCO₂e</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Documente procesate</div>
+            <div class="value">{{ documents_count }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Activități identificate</div>
+            <div class="value">{{ activities_count }}</div>
+        </div>
+    </div>
 
     <table>
         <thead>
             <tr>
-                <th>Scope</th>
-                <th>kg CO₂e</th>
-                <th>t CO₂e</th>
+                <th>Categorie</th>
+                <th>Cantitate kgCO₂e</th>
+                <th>Cantitate tCO₂e</th>
+                <th>Pondere</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Scope 1 - Emisii directe</td>
+                <td>Scope 1</td>
                 <td>{{ by_scope.scope_1_kg }}</td>
                 <td>{{ by_scope.scope_1_tonnes }}</td>
+                <td>{{ by_scope.scope_1_percent }}%</td>
             </tr>
             <tr>
-                <td>Scope 2 - Energie achiziționată</td>
+                <td>Scope 2</td>
                 <td>{{ by_scope.scope_2_kg }}</td>
                 <td>{{ by_scope.scope_2_tonnes }}</td>
+                <td>{{ by_scope.scope_2_percent }}%</td>
             </tr>
             <tr>
-                <td>Scope 3 - Lanț valoric</td>
+                <td>Scope 3</td>
                 <td>{{ by_scope.scope_3_kg }}</td>
                 <td>{{ by_scope.scope_3_tonnes }}</td>
+                <td>{{ by_scope.scope_3_percent }}%</td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<section>
-    <h2>3. Activități și calcule</h2>
+<section class="page">
+    <h2>Diagrame emisii</h2>
+
+    <div class="chart-row">
+        <div class="chart-card">
+            <canvas id="scopeChart"></canvas>
+            <div class="chart-title">Fig. 1 - Total emisii pe Scope (tCO₂e)</div>
+        </div>
+
+        <div class="chart-card">
+            <canvas id="activityChart"></canvas>
+            <div class="chart-title">Fig. 2 - Emisii pe tip activitate (tCO₂e)</div>
+        </div>
+    </div>
+
+    <div class="chart-card-wide">
+        <canvas id="barChart"></canvas>
+        <div class="chart-title">Fig. 3 - Comparație emisii Scope 1, 2 și 3</div>
+    </div>
+</section>
+
+<section class="page">
+    <h2>Metodologie calcul amprenta de carbon</h2>
+
+    <div class="methodology-box">
+        Formula generală utilizată:
+        <strong>Date de activitate × Factor de emisie = Emisii CO₂e</strong>
+    </div>
+
+    <h3>Scope 1</h3>
+    <p>
+        Pentru combustibili lichizi, emisiile au fost calculate pe baza cantității extrase
+        din documente și a factorului specific combustibilului.
+    </p>
+
+    <h3>Scope 2</h3>
+    <p>
+        Pentru energia electrică și energia termică achiziționată, calculul pornește de la
+        consumul exprimat în kWh sau MWh și aplică factorii de emisie corespunzători.
+    </p>
+
+    <h3>Scope 3</h3>
+    <p>
+        În această versiune a raportului, Scope 3 este inclus doar dacă există date încărcate
+        și procesate pentru categoriile relevante.
+    </p>
+
+    <h3>Factori de emisie utilizați</h3>
 
     <table>
         <thead>
             <tr>
-                <th>Document</th>
+                <th>Tip activitate</th>
+                <th>Factor emisii</th>
+                <th>Unitate factor</th>
+                <th>Formula</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factor in emission_factors %}
+            <tr>
+                <td>{{ factor.activity_type }}</td>
+                <td>{{ factor.emission_factor }}</td>
+                <td>{{ factor.emission_factor_unit }}</td>
+                <td>{{ factor.formula }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section class="page">
+    <h2>Limitări</h2>
+
+    <ul>
+        {% for limitation in limitations %}
+        <li>{{ limitation }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Idei pentru reducerea amprentei de carbon</h2>
+
+    <ul>
+        {% for recommendation in recommendations %}
+        <li>{{ recommendation }}</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="page">
+    <h2>Anexă tehnică</h2>
+
+    <p>
+        Această anexă include datele agregate utilizate pentru calculul raportului.
+        Numele fișierelor încărcate nu sunt afișate în raportul principal, dar sunt păstrate
+        în sistem pentru trasabilitate și audit.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
                 <th>Tip activitate</th>
                 <th>Scope</th>
                 <th>Cantitate</th>
                 <th>Unitate</th>
-                <th>Factor</th>
-                <th>Emisii kg CO₂e</th>
-                <th>Formula</th>
+                <th>Emisii tCO₂e</th>
+                <th>Încredere</th>
             </tr>
         </thead>
         <tbody>
             {% for row in activities %}
             <tr>
-                <td>{{ row.filename }}</td>
                 <td>{{ row.activity_type }}</td>
                 <td>Scope {{ row.scope }}</td>
                 <td>{{ row.quantity }}</td>
                 <td>{{ row.unit }}</td>
-                <td>{{ row.emission_factor }} {{ row.emission_factor_unit }}</td>
-                <td>{{ row.co2e_kg }}</td>
-                <td>{{ row.formula }}</td>
+                <td>{{ row.co2e_tonnes }}</td>
+                <td>{{ row.confidence }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</section>
 
-<section>
-    <h2>4. Documente justificative</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Fișier</th>
-                <th>Tip document</th>
-                <th>Status</th>
-                <th>Confidence OCR/AI</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for doc in documents %}
-            <tr>
-                <td>{{ doc.filename }}</td>
-                <td>{{ doc.document_type }}</td>
-                <td>{{ doc.status }}</td>
-                <td>{{ doc.confidence }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
-
-<section>
-    <h2>5. Metodologie</h2>
-    <p>
-        Calculul emisiilor este realizat pe baza formulei:
-        <strong>Date de activitate × Factor de emisie = Emisii CO₂e</strong>.
-    </p>
-    <p>
-        Raportul este structurat pentru monitorizare și raportare simplificată,
-        incluzând activitățile desfășurate, fluxurile de energie/combustibili,
-        cantitățile utilizate, factorii de emisie și documentele justificative.
+    <p class="footer-note">
+        Raport generat automat de CO2nvert. Rezultatele trebuie verificate înainte de utilizare oficială.
     </p>
 </section>
 
-<section>
-    <h2>6. Observații pentru verificare</h2>
+<script id="chart-data" type="application/json">
+{{ chart_data | safe }}
+</script>
 
-    {% if low_confidence_items %}
-        <p class="warning">
-            Există activități cu scor de încredere sub 80%. Se recomandă verificare manuală.
-        </p>
+<script>
+    const chartDataElement = document.getElementById("chart-data");
+    const chartData = JSON.parse(chartDataElement.textContent);
 
-        <ul>
-        {% for item in low_confidence_items %}
-            <li>{{ item.activity_type }} - {{ item.confidence }}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>Nu au fost identificate activități cu scor scăzut de încredere.</p>
-    {% endif %}
-</section>
+    const scopeLabels = chartData.scopeLabels;
+    const scopeValues = chartData.scopeValues;
+
+    const activityLabels = chartData.activityLabels;
+    const activityValues = chartData.activityValues;
+
+    new Chart(document.getElementById("scopeChart"), {
+        type: "pie",
+        data: {
+            labels: scopeLabels,
+            datasets: [{
+                data: scopeValues
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            plugins: {
+                legend: { position: "bottom" }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("activityChart"), {
+        type: "doughnut",
+        data: {
+            labels: activityLabels,
+            datasets: [{
+                data: activityValues
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            plugins: {
+                legend: { position: "bottom" }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+            labels: scopeLabels,
+            datasets: [{
+                label: "tCO₂e",
+                data: scopeValues
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
