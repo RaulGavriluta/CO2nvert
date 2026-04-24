@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+jinja2
+weasyprint
+pypdf
+pillow
+pytesseract
+opencv-python-headless
+requests
+python-dotenv
+pymupdf

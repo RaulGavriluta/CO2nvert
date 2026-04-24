@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc.*
+*.py,cover
+
+# Virtual env
+venv/
+.env
+
+# SQLite database
+*.db
+
+# Storage (uploads + reports)
+storage/uploads/*
+storage/reports/*
+
+!storage/uploads/.keep
+!storage/reports/.keep
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
