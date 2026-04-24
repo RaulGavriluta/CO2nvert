@@ -4,7 +4,7 @@ sqlalchemy
 pydantic
 python-multipart
 jinja2
-weasyprint
+playwright
 pypdf
 pillow
 pytesseract
