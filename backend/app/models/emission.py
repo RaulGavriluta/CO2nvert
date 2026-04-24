@@ -11,10 +11,13 @@ class Emission(Base):
 
     activity_id = Column(Integer, ForeignKey("activities.id"))
 
-    emission_factor = Column(Float)
     co2e_value = Column(Float)
+    co2e_unit = Column(String, default="kgCO2e")
 
-    calculation_method = Column(String, default="quantity * emission_factor")
-    formula = Column(String, nullable=True)
+    emission_factor = Column(Float)
+    emission_factor_unit = Column(String)
+
+    calculation_method = Column(String)
+    formula = Column(String)
 
     activity = relationship("Activity", back_populates="emission")

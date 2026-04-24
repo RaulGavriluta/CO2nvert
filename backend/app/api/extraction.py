@@ -18,7 +18,8 @@ def get_category_code(document_type: str) -> str:
 
     if document_type == "gas_invoice":
         return "scope_1_stationary_combustion"
-
+    if document_type == "thermal_invoice":
+        return "scope_2_purchased_heating_cooling_steam"
     return "unknown"
 
 
@@ -49,6 +50,17 @@ def extract_batch(batch_id: int, db: Session = Depends(get_db)):
             .filter(EmissionCategory.code == category_code)
             .first()
         )
+
+        existing_activities = (
+            db.query(Activity)
+            .filter(Activity.document_id == document.id)
+            .all()
+        )
+
+        for existing_activity in existing_activities:
+            db.delete(existing_activity)
+
+        db.flush()
 
         activity = Activity(
             document_id=document.id,

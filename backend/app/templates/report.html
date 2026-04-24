@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CO2nvert Emissions Report</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    color: #1f2937;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.cover {
+    text-align: center;
+    padding-top: 120px;
+    page-break-after: always;
+}
+
+h1 {
+    font-size: 42px;
+    color: #064e3b;
+}
+
+h2 {
+    color: #047857;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 6px;
+    margin-top: 28px;
+}
+
+.kpi {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 16px;
+    font-size: 18px;
+    margin: 16px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+th {
+    background: #d1fae5;
+}
+
+th, td {
+    border: 1px solid #d1d5db;
+    padding: 6px;
+    vertical-align: top;
+}
+
+.warning {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    padding: 10px;
+}
+</style>
+</head>
+<body>
+
+<section class="cover">
+    <h1>CO2nvert</h1>
+    <h2>Raport anual simplificat privind emisiile GES</h2>
+    <p>{{ company_name }}</p>
+    <p>Perioada de raportare: {{ reporting_period }}</p>
+    <p>Generat la: {{ generated_at }}</p>
+</section>
+
+<section>
+    <h2>1. Rezumat executiv</h2>
+    <p>
+        Raportul centralizează emisiile calculate automat pe baza documentelor încărcate,
+        valorilor extrase prin OCR și factorilor de emisie configurați în aplicație.
+    </p>
+
+    <div class="kpi">
+        <strong>Total emisii:</strong>
+        {{ total_co2e_tonnes }} tCO₂e
+    </div>
+</section>
+
+<section>
+    <h2>2. Emisii pe Scope</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Scope</th>
+                <th>kg CO₂e</th>
+                <th>t CO₂e</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Scope 1 - Emisii directe</td>
+                <td>{{ by_scope.scope_1_kg }}</td>
+                <td>{{ by_scope.scope_1_tonnes }}</td>
+            </tr>
+            <tr>
+                <td>Scope 2 - Energie achiziționată</td>
+                <td>{{ by_scope.scope_2_kg }}</td>
+                <td>{{ by_scope.scope_2_tonnes }}</td>
+            </tr>
+            <tr>
+                <td>Scope 3 - Lanț valoric</td>
+                <td>{{ by_scope.scope_3_kg }}</td>
+                <td>{{ by_scope.scope_3_tonnes }}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>3. Activități și calcule</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Tip activitate</th>
+                <th>Scope</th>
+                <th>Cantitate</th>
+                <th>Unitate</th>
+                <th>Factor</th>
+                <th>Emisii kg CO₂e</th>
+                <th>Formula</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in activities %}
+            <tr>
+                <td>{{ row.filename }}</td>
+                <td>{{ row.activity_type }}</td>
+                <td>Scope {{ row.scope }}</td>
+                <td>{{ row.quantity }}</td>
+                <td>{{ row.unit }}</td>
+                <td>{{ row.emission_factor }} {{ row.emission_factor_unit }}</td>
+                <td>{{ row.co2e_kg }}</td>
+                <td>{{ row.formula }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>4. Documente justificative</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fișier</th>
+                <th>Tip document</th>
+                <th>Status</th>
+                <th>Confidence OCR/AI</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.filename }}</td>
+                <td>{{ doc.document_type }}</td>
+                <td>{{ doc.status }}</td>
+                <td>{{ doc.confidence }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>5. Metodologie</h2>
+    <p>
+        Calculul emisiilor este realizat pe baza formulei:
+        <strong>Date de activitate × Factor de emisie = Emisii CO₂e</strong>.
+    </p>
+    <p>
+        Raportul este structurat pentru monitorizare și raportare simplificată,
+        incluzând activitățile desfășurate, fluxurile de energie/combustibili,
+        cantitățile utilizate, factorii de emisie și documentele justificative.
+    </p>
+</section>
+
+<section>
+    <h2>6. Observații pentru verificare</h2>
+
+    {% if low_confidence_items %}
+        <p class="warning">
+            Există activități cu scor de încredere sub 80%. Se recomandă verificare manuală.
+        </p>
+
+        <ul>
+        {% for item in low_confidence_items %}
+            <li>{{ item.activity_type }} - {{ item.confidence }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nu au fost identificate activități cu scor scăzut de încredere.</p>
+    {% endif %}
+</section>
+
+</body>
+</html>
