@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react'; // Adăugat useContext
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+// IMPORTĂ CONTEXTUL TĂU AICI (Verifică să ai calea corectă spre fișier)
+import { DataContext } from '../../DataContext'; 
 
 const ProcessBatch: React.FC = () => {
   const { batchId } = useParams();
   const navigate = useNavigate();
   
+  // Tragem funcția de reîmprospătare din Context
+  const context = useContext(DataContext);
+  if (!context) throw new Error("ProcessBatch trebuie să fie în interiorul unui DataProvider");
+  const { refreshDashboardData } = context;
+
   const [activities, setActivities] = useState<any[]>([]);
   const [loadingText, setLoadingText] = useState("AI-ul citește documentele...");
   const [isExtracting, setIsExtracting] = useState(true);
@@ -38,6 +45,7 @@ const ProcessBatch: React.FC = () => {
   }, [batchId]);
 
   // 2. Funcția pentru Butonul Final (Calculul Emisiilor)
+  // 2. Funcția pentru Butonul Final (Calculul Emisiilor)
   const handleCalculateEmissions = async () => {
     setIsCalculating(true);
     setLoadingText("Calculăm amprenta de carbon...");
@@ -47,12 +55,34 @@ const ProcessBatch: React.FC = () => {
         method: 'POST',
       });
 
-      if (response.ok) {
-        // Dacă calculul a reușit, ne întoarcem la Dashboard să vedem graficul!
+      // Verificăm dacă răspunsul NU este ok (ex: 404, 422, 500)
+      if (!response.ok) {
+        // Citim mesajul de eroare de la backend pentru a înțelege problema
+        const errorData = await response.json().catch(() => null);
+        console.error("Backend-ul a returnat o eroare:", response.status, errorData);
+        alert(`Eroare de la server (${response.status}). Verifică consola (F12) pentru detalii.`);
+        setIsCalculating(false); // Oprim ecranul de loading
+        return; // Oprim execuția funcției aici
+      }
+
+      // Dacă am ajuns aici, backend-ul a zis 200 OK!
+      console.log("Calculul a reușit pe backend. Aducem datele proaspete pentru Dashboard...");
+      
+      try {
+        await refreshDashboardData();
+        console.log("Datele au fost reîmprospătate cu succes! Navigăm spre Dashboard.");
+        navigate('/');
+      } catch (refreshError) {
+        console.error("Eroare la aducerea noilor date pentru dashboard:", refreshError);
+        alert("Datele au fost salvate, dar nu am putut actualiza dashboard-ul. Navigăm oricum.");
+        setIsCalculating(false);
         navigate('/');
       }
+
     } catch (error) {
-      console.error("Eroare la calcul:", error);
+      // Aceasta prinde erori de rețea (ex: serverul Python e oprit complet sau erori CORS)
+      console.error("Eroare critică (Rețea sau Server Oprit):", error);
+      alert("Nu m-am putut conecta la server. Este pornit serverul pe portul 8000?");
       setIsCalculating(false);
     }
   };
