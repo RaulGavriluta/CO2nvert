@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')  # <--- TREBUIE să fie înainte de orice import de pyplot
+import matplotlib.pyplot as plt
 from pathlib import Path
 import base64
 import matplotlib

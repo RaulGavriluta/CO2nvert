@@ -3,13 +3,18 @@ import MainLayout from './layouts/MainLayout';
 import Dashboard from './features/dashboard/Dashboard'; 
 import ActionSelection from './features/dashboard/ActionSelection';
 import ProcessBatch from './features/upload/ProcessBatch'; 
+import ReportPreview from './features/analytics/ReportPreview';
 
 // NOU: Importă DataProvider-ul pe care l-am creat (asigură-te că pui folderul corect unde l-ai salvat)
 // De exemplu, dacă l-ai pus într-un folder 'context', calea ar fi './context/DataContext'
 import { DataProvider } from './DataContext'; 
 
 // Componente temporare (Placeholders) pentru paginile viitoare
-const ReportsPage = () => <div className="p-4 bg-white rounded-xl shadow-sm">Secțiunea Rapoarte Anuale - În lucru</div>;
+const ReportsPage = () => (
+  <div className="p-4 bg-white rounded-xl shadow-sm min-h-[70vh]">
+    <ReportPreview />
+  </div>
+);
 const SettingsPage = () => <div className="p-4 bg-white rounded-xl shadow-sm">Secțiunea Setări - În lucru</div>;
 
 function App() {
