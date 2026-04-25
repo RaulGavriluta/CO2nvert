@@ -90,40 +90,51 @@ def render_pdf_pages_to_images(file_path: str) -> list[str]:
     return image_paths
 
 
-def extract_text_with_ocr_space(file_path: str) -> str:
-    url = "https://api.ocr.space/parse/image"
+def extract_text_with_ocr_space(image_path: str) -> str:
+    # 1. Luăm cheia ta din fișierul .env
+    api_key = os.getenv("OCR_API_KEY")
+    if not api_key:
+        raise ValueError("❌ Cheia OCR_API_KEY nu a fost găsită în .env!")
 
-    with open(file_path, "rb") as file:
+    print(f"🔍 [OCR Real] Trimitem documentul la citit: {image_path}")
+
+    # 2. Configurăm cererea exact cum cere OCR.space
+    payload = {
+        'apikey': api_key,
+        'language': 'eng',
+        'isOverlayRequired': 'false'  # <--- CORECRAT: Trebuia să fie string cu litere mici
+    }
+
+    # 3. Trimitem fișierul
+    with open(image_path, 'rb') as f:
         response = requests.post(
-            url,
-            files={"file": file},
-            data={
-                "apikey": OCR_SPACE_API_KEY,
-                "language": "eng",
-                "isOverlayRequired": False,
-                "OCREngine": 2,
-                "scale": True,
-                "detectOrientation": True,
-            },
-            timeout=60,
+            'https://api.ocr.space/parse/image',
+            files={'file': (os.path.basename(image_path), f)}, # <--- CORECTAT: Trimitem cu cheia 'file'
+            data=payload,
         )
 
+    # 4. Dacă tot primim eroare, printăm EXACT ce nu i-a convenit ca să știm
+    if not response.ok:
+        print(f"❌ Eroare 400. Serverul a răspuns: {response.text}")
+    
     response.raise_for_status()
+
     result = response.json()
-
+    
     if result.get("IsErroredOnProcessing"):
-        error_message = result.get("ErrorMessage") or result.get("ErrorDetails")
-        raise Exception(f"OCR.space error: {error_message}")
-
-    parsed_results = result.get("ParsedResults", [])
-
-    if not parsed_results:
+        print(f"❌ Eroare internă de la OCR.space: {result.get('ErrorMessage')}")
         return ""
 
-    return "\n".join(
-        item.get("ParsedText", "")
-        for item in parsed_results
-    ).strip()
+    # 5. Extragem textul citit din poză
+    parsed_results = result.get("ParsedResults")
+    if not parsed_results:
+        print("⚠️ Nu s-a găsit text în imagine.")
+        return ""
+        
+    parsed_text = parsed_results[0].get("ParsedText", "")
+    
+    print("✅ Text extras cu succes!")
+    return parsed_text
 
 
 def extract_text_from_pdf_with_ocr(file_path: str) -> str:
