@@ -10,6 +10,8 @@ __pycache__/
 venv/
 .env
 
+frontend/node_modules/
+
 # SQLite database
 *.db
 
