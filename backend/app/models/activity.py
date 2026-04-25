@@ -25,4 +25,4 @@ class Activity(Base):
 
     document = relationship("Document", back_populates="activities")
     category = relationship("EmissionCategory", back_populates="activities")
-    emission = relationship("Emission", back_populates="activity", uselist=False)
+    emission = relationship("Emission", back_populates="activity", uselist=False, cascade="all, delete-orphan")

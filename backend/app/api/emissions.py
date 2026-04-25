@@ -44,7 +44,6 @@ def calculate_batch_emissions(batch_id: int, db: Session = Depends(get_db)):
 
         if existing_emission:
             db.delete(existing_emission)
-            db.commit()
 
         co2e, factor, factor_unit, formula = calculate_emission(
             activity_type=activity.activity_type,
