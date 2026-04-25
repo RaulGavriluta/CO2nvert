@@ -4,9 +4,14 @@ import Dashboard from './features/dashboard/Dashboard';
 import ActionSelection from './features/dashboard/ActionSelection';
 // Importă noua componentă (asigură-te că drumul către fișier este corect)
 import ProcessBatch from './features/upload/ProcessBatch'; 
+import ReportPreview from './features/analytics/ReportPreview';
 
 // Componente temporare (Placeholders) pentru paginile viitoare
-const ReportsPage = () => <div className="p-4 bg-white rounded-xl shadow-sm">Secțiunea Rapoarte Anuale - În lucru</div>;
+const ReportsPage = () => (
+  <div className="p-4 bg-white rounded-xl shadow-sm min-h-[70vh]">
+    <ReportPreview />
+  </div>
+);
 const SettingsPage = () => <div className="p-4 bg-white rounded-xl shadow-sm">Secțiunea Setări - În lucru</div>;
 
 function App() {
