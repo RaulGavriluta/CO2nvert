@@ -1,7 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react'; // Adăugat useContext
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-// IMPORTĂ CONTEXTUL TĂU AICI (Verifică să ai calea corectă spre fișier)
+import { 
+  Loader2, 
+  CheckCircle, 
+  AlertCircle, 
+  AlertTriangle, 
+  Info, 
+  Zap, 
+  ArrowRight 
+} from 'lucide-react';
+// Asigură-te că această cale este corectă în proiectul tău
 import { DataContext } from '../../DataContext'; 
 
 const ProcessBatch: React.FC = () => {
@@ -10,8 +18,8 @@ const ProcessBatch: React.FC = () => {
   
   // Tragem funcția de reîmprospătare din Context
   const context = useContext(DataContext);
-  if (!context) throw new Error("ProcessBatch trebuie să fie în interiorul unui DataProvider");
-  const { refreshDashboardData } = context;
+  const refreshDashboardData = context?.refreshDashboardData;
+  const setActiveBatch = context?.setActiveBatch;
 
   const [activities, setActivities] = useState<any[]>([]);
   const [loadingText, setLoadingText] = useState("AI-ul citește documentele...");
@@ -19,36 +27,52 @@ const ProcessBatch: React.FC = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Setează batch-ul curent în context când se încarcă componenta
+  useEffect(() => {
+    if (batchId && setActiveBatch) {
+      setActiveBatch(parseInt(batchId as string, 10));
+    }
+  }, [batchId, setActiveBatch]);
+
   // 1. Extracția Automată la încărcarea paginii
   useEffect(() => {
     const extractData = async () => {
       try {
         setIsExtracting(true);
         setError(null);
+        
+        console.log("Se inițiază cererea pentru batchId:", batchId);
+
         const response = await fetch(`http://127.0.0.1:8000/extract/${batchId}`, {
           method: 'POST',
         });
         
+        const data = await response.json();
+        console.log("DEBUG DATA:", data);
+
         if (response.ok) {
-          const data = await response.json();
-          setActivities(data.results || []);
+          if (data && Array.isArray(data.results)) {
+            setActivities(data.results);
+          } else {
+            setError("Backend-ul a trimis date într-un format neașteptat.");
+          }
         } else {
-          const errData = await response.json();
-          setError(errData.detail || "Eroare la extracția AI");
+          setError(data.detail || "Eroare la extracția AI");
         }
-      } catch (error) {
+      } catch (err) {
+        console.error("Catch error:", err);
         setError("Eroare de rețea: Verifică dacă backend-ul rulează.");
       } finally {
         setIsExtracting(false);
       }
     };
 
+    // ACEASTA ESTE LINIA CARE LIPSEA:
     if (batchId) {
       extractData();
     }
   }, [batchId]);
 
-  // 2. Funcția pentru Butonul Final (Calculul Emisiilor)
   // 2. Funcția pentru Butonul Final (Calculul Emisiilor)
   const handleCalculateEmissions = async () => {
     setIsCalculating(true);
@@ -60,46 +84,36 @@ const ProcessBatch: React.FC = () => {
         method: 'POST',
       });
 
-      // Verificăm dacă răspunsul NU este ok (ex: 404, 422, 500)
       if (!response.ok) {
-        // Citim mesajul de eroare de la backend pentru a înțelege problema
         const errorData = await response.json().catch(() => null);
         console.error("Backend-ul a returnat o eroare:", response.status, errorData);
-        alert(`Eroare de la server (${response.status}). Verifică consola (F12) pentru detalii.`);
-        setIsCalculating(false); // Oprim ecranul de loading
-        return; // Oprim execuția funcției aici
+        setError(`Eroare server (${response.status}): ${errorData?.detail || 'Calcul eșuat'}`);
+        setIsCalculating(false);
+        return;
       }
 
-      // Dacă am ajuns aici, backend-ul a zis 200 OK!
-      console.log("Calculul a reușit pe backend. Aducem datele proaspete pentru Dashboard...");
+      // Dacă am ajuns aici, calculul a reușit
+      console.log("Calcul reușit. Reîmprospătăm datele...");
       
-      try {
-        await refreshDashboardData();
-        console.log("Datele au fost reîmprospătate cu succes! Navigăm spre Dashboard.");
-        navigate('/');
-      } catch (refreshError) {
-        console.error("Eroare la aducerea noilor date pentru dashboard:", refreshError);
-        alert("Datele au fost salvate, dar nu am putut actualiza dashboard-ul. Navigăm oricum.");
-        setIsCalculating(false);
-        navigate('/');
-      } else {
-        const errData = await response.json();
-        setError(errData.detail || "Eroare la calcularea emisiilor.");
-        setIsCalculating(false);
+      if (refreshDashboardData) {
+        try {
+          await refreshDashboardData();
+        } catch (refreshError) {
+          console.error("Eroare la refresh context:", refreshError);
+          // Nu blocăm navigarea dacă doar refresh-ul a eșuat
+        }
       }
 
-    } catch (error) {
-      // Aceasta prinde erori de rețea (ex: serverul Python e oprit complet sau erori CORS)
-      console.error("Eroare critică (Rețea sau Server Oprit):", error);
-      alert("Nu m-am putut conecta la server. Este pornit serverul pe portul 8000?");
+      navigate('/');
+    } catch (err) {
+      console.error("Eroare critică:", err);
+      setError("Nu m-am putut conecta la server.");
       setIsCalculating(false);
     }
   };
 
   const renderScopeColumn = (scopeNum: number, title: string, borderColor: string, bgColor: string) => {
-    const scopeActivities = activities.filter(a => a.activity.scope === scopeNum);
-
-    return (
+const scopeActivities = activities.filter(a => a?.activity?.scope == scopeNum);    return (
       <div className={`p-6 rounded-2xl border-2 ${borderColor} ${bgColor} shadow-sm flex flex-col h-full`}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-lg text-slate-800">{title}</h3>
@@ -121,7 +135,9 @@ const ProcessBatch: React.FC = () => {
                 <div key={idx} className={`p-3 rounded-xl border bg-white flex justify-between items-center transition-all ${isLowConfidence ? 'border-amber-200 shadow-sm' : 'border-slate-100'}`}>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-slate-800 text-sm capitalize">{item.activity.activity_type.replace('_', ' ')}</p>
+                      <p className="font-bold text-slate-800 text-sm capitalize">
+                        {item.activity.activity_type?.replace(/_/g, ' ')}
+                      </p>
                       {isLowConfidence && (
                         <div className="group relative">
                           <AlertTriangle size={14} className="text-amber-500" />
@@ -152,9 +168,9 @@ const ProcessBatch: React.FC = () => {
   if (isExtracting || isCalculating) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in">
-        <div className="relative">
-            <Loader2 size={80} className="text-emerald-500 animate-spin mb-6 opacity-20" />
-            <Zap size={32} className="text-emerald-500 absolute top-6 left-6 animate-pulse" />
+        <div className="relative mb-6">
+            <Loader2 size={80} className="text-emerald-500 animate-spin opacity-20" />
+            <Zap size={32} className="text-emerald-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
         </div>
         <h2 className="text-2xl font-bold text-slate-800">{loadingText}</h2>
         <p className="text-slate-500 mt-2">Sistemul CO2nvert analizează datele extrase...</p>
@@ -175,7 +191,7 @@ const ProcessBatch: React.FC = () => {
         
         {error && (
           <div className="bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 flex items-center gap-2 animate-bounce">
-            <AlertTriangle size={18} />
+            <AlertCircle size={18} />
             <span className="text-sm font-bold">{error}</span>
           </div>
         )}

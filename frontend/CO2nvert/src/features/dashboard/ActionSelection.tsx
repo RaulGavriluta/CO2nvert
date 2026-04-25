@@ -4,10 +4,13 @@ import {
   PlusCircle, History, ArrowRight, Loader2, 
   X, Factory, Zap, Truck, FileUp, ArrowLeft, Calendar, Calculator, CheckCircle2 
 } from 'lucide-react';
+import { DataContext } from '../../DataContext';
 import HistoryTable from './HistoryTable';
 
 const ActionSelection: React.FC = () => {
   const navigate = useNavigate();
+  const context = useContext(DataContext);
+  const setActiveBatch = context?.setActiveBatch;
   
   // Stări pentru UI
   const [isUploading, setIsUploading] = useState(false);
@@ -69,6 +72,10 @@ const ActionSelection: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+        // Set the active batch in context
+        if (setActiveBatch) {
+          setActiveBatch(data.batch_id);
+        }
         setIsModalOpen(false);
         navigate(`/process-batch/${data.batch_id}`);
       }

@@ -1,12 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { UploadCloud, File as FileIcon, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { DataContext } from '../../DataContext';
 
 // Definim ce parametri primește această componentă de la părinte
 interface InvoiceUploaderProps {
-  onUploadComplete: (batchId: number) => void;
+  onUploadComplete?: (batchId: number) => void;
 }
 
 const InvoiceUploader: React.FC<InvoiceUploaderProps> = ({ onUploadComplete }) => {
+  const navigate = useNavigate();
+  const context = useContext(DataContext);
+  const setActiveBatch = context?.setActiveBatch;
+  
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,8 +70,18 @@ const InvoiceUploader: React.FC<InvoiceUploaderProps> = ({ onUploadComplete }) =
       const data = await response.json();
       console.log('Răspuns server:', data);
 
+      // Set the active batch in context
+      if (setActiveBatch) {
+        setActiveBatch(data.batch_id);
+      }
+
       // Dacă a mers, îi dăm părintelui ID-ul Batch-ului ca să treacă la Extracție
-      onUploadComplete(data.batch_id);
+      if (onUploadComplete) {
+        onUploadComplete(data.batch_id);
+      } else {
+        // Dacă nu are callback, navigheaza automat
+        navigate(`/process-batch/${data.batch_id}`);
+      }
 
     } catch (err: any) {
       setError(err.message || 'A apărut o eroare de rețea. Verifică dacă backend-ul este pornit.');
