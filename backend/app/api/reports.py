@@ -7,11 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models import Batch, Document, Activity, Report
 from app.services.report_generator import generate_report_pdf
-from app.services.ai_report_writer import (
-    generate_ai_summary,
-    generate_ai_limitations,
-    generate_ai_recommendations,
-)
+
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
@@ -159,18 +155,15 @@ def generate_report(batch_id: int, db: Session = Depends(get_db)):
         "chart_scope_items": chart_scope_items,
         "chart_activity_items": chart_activity_items,
 
-        "ai_summary": generate_ai_summary(
-            total_tonnes=total_tonnes,
-            by_scope=by_scope_for_ai,
-            activity_breakdown=activity_breakdown,
-        ),
-
-        "limitations": generate_ai_limitations(activity_rows),
-
-        "recommendations": generate_ai_recommendations(
-            by_scope=by_scope_for_ai,
-            activity_breakdown=activity_breakdown,
-        ),
+        "ai_summary": "",
+"limitations": [
+    "Raportul depinde de calitatea documentelor încărcate și de acuratețea procesului OCR.",
+    "Valorile extrase automat trebuie verificate înainte de utilizarea raportului în scopuri oficiale.",
+],
+"recommendations": [
+    "Monitorizarea periodică a consumurilor pentru identificarea variațiilor neobișnuite.",
+    "Extinderea colectării datelor pentru Scope 3: deșeuri, navetă, transport și achiziții.",
+],
     }
 
     report_path = generate_report_pdf(context)

@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI
 from app.database import Base, engine
 from app.api import upload, extraction, batches, documents, emissions, dashboard, reports

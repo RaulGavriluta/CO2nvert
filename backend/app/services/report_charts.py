@@ -1,7 +1,9 @@
 from pathlib import Path
 import base64
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
 
+import matplotlib.pyplot as plt
 
 def _ensure_dir(path: Path):
     path.mkdir(parents=True, exist_ok=True)

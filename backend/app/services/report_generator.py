@@ -8,6 +8,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from playwright.async_api import async_playwright
 
 from app.services.report_charts import generate_report_charts
+from app.services.ai_report_writer import generate_report_text
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
@@ -21,6 +22,7 @@ def image_to_data_uri(path: Path) -> str | None:
     encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
     return f"data:image/png;base64,{encoded}"
 
+
 async def html_to_pdf(html_content: str, output_path: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -29,44 +31,26 @@ async def html_to_pdf(html_content: str, output_path: str):
         await page.set_content(html_content, wait_until="networkidle")
 
         await page.pdf(
-    path=output_path,
-    format="A4",
-    print_background=True,
-    prefer_css_page_size=True,
-    outline=True,
-    margin={
-        "top": "0mm",
-        "right": "0mm",
-        "bottom": "0mm",
-        "left": "0mm",
-    },
-)
+            path=output_path,
+            format="A4",
+            print_background=True,
+            prefer_css_page_size=True,
+            outline=True,
+            margin={
+                "top": "0mm",
+                "right": "0mm",
+                "bottom": "0mm",
+                "left": "0mm",
+            },
+        )
 
         await browser.close()
 
 
 def prepare_report_context(context: dict) -> dict:
-    """
-    Completeaza contextul pentru Jinja cu grafice PNG generate server-side.
-    Asteapta ca in context sa existe:
-    - batch_id
-    - by_scope
-    - chart_activity_items
-    """
-
     batch_id = context.get("batch_id")
     if batch_id is None:
         batch_id = uuid4().hex
-
-    charts = generate_report_charts(
-    batch_id=batch_id,
-    by_scope=context.get("by_scope", {}),
-    activity_items=context.get("chart_activity_items", []),
-)
-
-    context["charts"] = charts
-
-    context["charts"] = charts
 
     context.setdefault("company_name", "Companie")
     context.setdefault("reporting_period", "N/A")
@@ -77,13 +61,27 @@ def prepare_report_context(context: dict) -> dict:
     context.setdefault("emission_factors", [])
     context.setdefault("limitations", [])
     context.setdefault("recommendations", [])
-    context.setdefault("ai_summary", "Raport generat automat pe baza documentelor procesate.")
     context.setdefault("by_scope", {})
     context.setdefault("chart_scope_items", [])
     context.setdefault("chart_activity_items", [])
 
+    charts = generate_report_charts(
+        batch_id=batch_id,
+        by_scope=context.get("by_scope", {}),
+        activity_items=context.get("chart_activity_items", []),
+    )
+
+    context["charts"] = charts
+
     context["ghg_scope_image"] = image_to_data_uri(
-    Path("storage/assets/image.png")
+        Path("storage/assets/image.png")
+    )
+
+    ai_report_text = generate_report_text(context)
+    context["ai_report_text"] = ai_report_text
+    context["ai_summary"] = ai_report_text.get(
+        "executive_summary",
+        "Raport generat automat pe baza documentelor procesate.",
     )
 
     return context

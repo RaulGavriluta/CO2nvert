@@ -34,8 +34,6 @@
             page-break-after: auto;
         }
 
-        /* COVER */
-
         .cover {
             page-break-after: always;
             height: 297mm;
@@ -151,8 +149,6 @@
             padding-left: 12px;
         }
 
-        /* TYPOGRAPHY */
-
         h1, h2, h3 {
             color: #b91c1c;
             page-break-after: avoid;
@@ -172,8 +168,6 @@
         p {
             margin: 0 0 12px;
         }
-
-        /* TOC */
 
         .toc-title {
             margin-bottom: 26px;
@@ -207,8 +201,6 @@
         .toc-row a:hover {
             color: #b91c1c;
         }
-
-        /* CONTENT BLOCKS */
 
         .note {
             background: #fef3c7;
@@ -265,8 +257,6 @@
             display: block;
         }
 
-        /* KPI */
-
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -294,8 +284,6 @@
             color: #111827;
             margin-top: 4px;
         }
-
-        /* TABLES */
 
         table {
             width: 100%;
@@ -334,8 +322,6 @@
             margin-top: 8px;
         }
 
-        /* CHARTS */
-
         .chart-card {
             border: 1px solid #e5e7eb;
             padding: 18px;
@@ -367,8 +353,6 @@
             font-style: italic;
             font-size: 12px;
         }
-
-        /* METHODOLOGY */
 
         .methodology-box {
             border-left: 4px solid #047857;
@@ -469,9 +453,7 @@
     </p>
 
     <p>
-        Scopul raportului este de a oferi o imagine sintetică asupra principalelor surse de emisii,
-        astfel încât compania să poată identifica zonele cu impact ridicat și să prioritizeze măsuri
-        de reducere a amprentei de carbon.
+        {{ ai_report_text.professional_intro }}
     </p>
 
     <p>
@@ -480,27 +462,15 @@
     </p>
 
     <div class="note">
-        {{ ai_summary }}
+        {{ ai_report_text.executive_summary }}
     </div>
 
-    <p>
-        Raportul este realizat în conformitate cu metodologia GHG Protocol, un standard global
-        utilizat pentru cuantificarea și raportarea emisiilor de gaze cu efect de seră. Această
-        abordare permite clasificarea emisiilor în categorii relevante pentru managementul intern,
-        raportarea ESG și identificarea inițiativelor de reducere.
-    </p>
+  
 
     <h3>Interpretarea rezultatelor</h3>
 
     <p>
-        Analiza emisiilor indică principalele surse de impact climatic ale companiei și oferă
-        o bază pentru luarea deciziilor strategice privind reducerea amprentei de carbon.
-    </p>
-
-    <p>
-        Identificarea distribuției emisiilor pe Scope permite prioritizarea intervențiilor:
-        emisiile directe (Scope 1), consumul energetic (Scope 2) și impactul extins al
-        lanțului valoric (Scope 3).
+        {{ ai_report_text.results_interpretation }}
     </p>
 
     <div class="ghg-footer">
@@ -612,6 +582,10 @@
 <section class="page" id="diagrame">
     <h2>Diagrame emisii</h2>
 
+    <p>
+        {{ ai_report_text.chart_explanation }}
+    </p>
+
     <figure class="chart-card">
         <img src="{{ charts.scope_pie }}" class="chart-img chart-img-big">
         <figcaption>Fig. 1 - Distribuția emisiilor pe Scope</figcaption>
@@ -670,6 +644,12 @@
         și procesate pentru categoriile relevante.
     </p>
 
+    <h3>Observații privind activitățile analizate</h3>
+
+   <div class="note">
+    {{ ai_report_text.activity_narrative }}
+</div>
+
     <h3>Factori de emisie utilizați</h3>
 
     <table>
@@ -699,16 +679,24 @@
 <section class="page" id="limitari">
     <h2>Limitări</h2>
 
-    <ul>
-        {% for limitation in limitations %}
-        <li>{{ limitation }}</li>
-        {% endfor %}
-    </ul>
+    <p>
+        {{ ai_report_text.data_quality_note }}
+    </p>
+
+    
 
     <h2 id="recomandari" style="margin-top: 34px;">Idei pentru reducerea amprentei de carbon</h2>
 
     <ul>
         {% for recommendation in recommendations %}
+        <li>{{ recommendation }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Recomandări strategice suplimentare</h3>
+
+    <ul>
+        {% for recommendation in ai_report_text.strategic_recommendations %}
         <li>{{ recommendation }}</li>
         {% endfor %}
     </ul>

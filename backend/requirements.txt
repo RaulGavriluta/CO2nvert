@@ -13,3 +13,4 @@ requests
 python-dotenv
 pymupdf
 matplotlib
+google-genai
