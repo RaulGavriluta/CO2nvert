@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Leaf, BarChart3, FileText, Settings, UploadCloud } from 'lucide-react';
+import { BarChart3, FileText, Settings, UploadCloud } from 'lucide-react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,11 +14,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <header className="h-16 bg-emerald-600 text-white flex items-center justify-between px-6 shadow-md z-10 relative">
         
         {/* Partea stângă: Logo și Nume */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="bg-white/20 p-2 rounded-lg">
-            <Leaf className="text-white" size={24} />
-          </div>
-          <span className="text-xl font-bold tracking-tight">CO2nvert</span>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-xl font-black tracking-tight">
+            <span className="text-white">CO2</span>
+            <span className="text-emerald-200">nvert</span>
+          </span>
         </div>
 
         {/* --- MODIFICARE: Butonul mutat în MIJLOC --- */}
