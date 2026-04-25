@@ -2,205 +2,754 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>CO2nvert Emissions Report</title>
+    <title>CO2nvert Carbon Report</title>
+
     <style>
-body {
-    font-family: Arial, sans-serif;
-    color: #1f2937;
-    font-size: 12px;
-    line-height: 1.5;
-}
+        @page {
+            size: A4;
+            margin: 0;
+        }
 
-.cover {
-    text-align: center;
-    padding-top: 120px;
-    page-break-after: always;
-}
+        * {
+            box-sizing: border-box;
+        }
 
-h1 {
-    font-size: 42px;
-    color: #064e3b;
-}
+        body {
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+            font-size: 12px;
+            line-height: 1.55;
+            margin: 0;
+            background: white;
+        }
 
-h2 {
-    color: #047857;
-    border-bottom: 1px solid #d1d5db;
-    padding-bottom: 6px;
-    margin-top: 28px;
-}
+        .page {
+            page-break-after: always;
+            padding: 42px 48px;
+            min-height: 297mm;
+            position: relative;
+        }
 
-.kpi {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    padding: 16px;
-    font-size: 18px;
-    margin: 16px 0;
-}
+        .page:last-child {
+            page-break-after: auto;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 12px;
-}
+        /* COVER */
 
-th {
-    background: #d1fae5;
-}
+        .cover {
+            page-break-after: always;
+            height: 297mm;
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+        }
 
-th, td {
-    border: 1px solid #d1d5db;
-    padding: 6px;
-    vertical-align: top;
-}
+        .cover-bg {
+            position: absolute;
+            inset: 0;
+            background: #f8fafc;
+        }
 
-.warning {
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    padding: 10px;
-}
-</style>
+        .cover-image {
+            position: absolute;
+            right: 0;
+            top: 70mm;
+            width: 58%;
+            height: 120mm;
+            background:
+                linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)),
+                linear-gradient(135deg, #dbeafe, #ecfdf5);
+        }
+
+        .cover-image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 70% 40%, rgba(4,120,87,0.25), transparent 28%),
+                radial-gradient(circle at 50% 65%, rgba(14,165,233,0.25), transparent 30%),
+                linear-gradient(135deg, rgba(255,255,255,0.2), rgba(17,24,39,0.08));
+        }
+
+        .cover-red-panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 62%;
+            height: 100%;
+            background: rgba(185, 28, 28, 0.92);
+            clip-path: polygon(0 0, 78% 0, 100% 100%, 0 100%);
+        }
+
+        .cover-frame {
+            position: absolute;
+            inset: 36px;
+            border: 5px solid #b91c1c;
+            pointer-events: none;
+        }
+
+        .brand {
+            position: absolute;
+            left: 58px;
+            top: 54px;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            z-index: 5;
+        }
+
+        .cover-content {
+            position: absolute;
+            left: 70px;
+            bottom: 86px;
+            width: 395px;
+            color: white;
+            z-index: 5;
+        }
+
+        .cover-content h1 {
+            font-family: Georgia, serif;
+            color: white;
+            font-size: 42px;
+            line-height: 1.12;
+            margin: 0 0 24px;
+        }
+
+        .cover-line {
+            width: 100%;
+            height: 5px;
+            background: #111827;
+            margin: 20px 0 24px;
+        }
+
+        .cover-content h2 {
+            font-family: Georgia, serif;
+            color: white;
+            font-size: 24px;
+            margin: 0 0 8px;
+            border: none;
+        }
+
+        .cover-period {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 0 24px;
+        }
+
+        .cover-content h3 {
+            font-family: Georgia, serif;
+            color: white;
+            font-size: 28px;
+            margin: 0 0 26px;
+        }
+
+        .cover-note {
+            font-size: 13px;
+            line-height: 1.35;
+            border-left: 4px solid white;
+            padding-left: 12px;
+        }
+
+        /* TYPOGRAPHY */
+
+        h1, h2, h3 {
+            color: #b91c1c;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 26px;
+            margin: 0 0 18px;
+            font-weight: 500;
+        }
+
+        h3 {
+            font-size: 17px;
+            margin: 24px 0 10px;
+        }
+
+        p {
+            margin: 0 0 12px;
+        }
+
+        /* TOC */
+
+        .toc-title {
+            margin-bottom: 26px;
+        }
+
+        .toc-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #9ca3af;
+            padding: 7px 0;
+            font-size: 14px;
+        }
+
+        .toc-row span:first-child {
+            background: white;
+            padding-right: 8px;
+        }
+
+        .toc-row span:last-child {
+            background: white;
+            padding-left: 8px;
+        }
+
+        .toc-row a {
+            color: #1f2937;
+            text-decoration: none;
+            background: white;
+            padding-right: 8px;
+        }
+
+        .toc-row a:hover {
+            color: #b91c1c;
+        }
+
+        /* CONTENT BLOCKS */
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 14px;
+            margin: 18px 0;
+        }
+
+        .ghg-footer {
+            margin-top: 26px;
+            font-size: 11px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+        }
+
+        .ghg-footer a {
+            color: #b91c1c;
+            text-decoration: none;
+        }
+
+        .ghg-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .scope-block {
+            border-left: 4px solid #b91c1c;
+            padding: 8px 12px;
+            margin: 10px 0;
+            background: #f9fafb;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .scope-block strong {
+            color: #b91c1c;
+        }
+
+        .scope-block p {
+            margin: 3px 0 0;
+        }
+
+        .ghg-figure {
+            margin: 10px 0 18px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            text-align: center;
+        }
+
+        .ghg-img {
+            width: 100%;
+            height: 350px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* KPI */
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin: 22px 0;
+        }
+
+        .kpi {
+            padding: 16px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-left: 5px solid #b91c1c;
+        }
+
+        .kpi .label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .kpi .value {
+            font-size: 23px;
+            font-weight: bold;
+            color: #111827;
+            margin-top: 4px;
+        }
+
+        /* TABLES */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            page-break-inside: avoid;
+        }
+
+        th {
+            background: #b91c1c;
+            color: white;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 7px;
+            vertical-align: top;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .total-row td {
+            font-weight: bold;
+            background: #f3f4f6;
+        }
+
+        .figure-caption {
+            color: #b91c1c;
+            font-style: italic;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* CHARTS */
+
+        .chart-card {
+            border: 1px solid #e5e7eb;
+            padding: 18px;
+            background: white;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin: 18px 0 24px;
+        }
+
+        .chart-img {
+            width: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .chart-img-big {
+            height: 300px;
+        }
+
+        .chart-img-large {
+            height: 470px;
+        }
+
+        figcaption {
+            margin-top: 10px;
+            text-align: center;
+            color: #b91c1c;
+            font-weight: bold;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* METHODOLOGY */
+
+        .methodology-box {
+            border-left: 4px solid #047857;
+            padding: 12px 14px;
+            background: #ecfdf5;
+            margin: 16px 0;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        li {
+            margin-bottom: 7px;
+        }
+
+        .footer-note {
+            position: absolute;
+            left: 48px;
+            right: 48px;
+            bottom: 28px;
+            font-size: 10px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+        }
+
+        .annex-table {
+            font-size: 10px;
+        }
+
+        .annex-table th,
+        .annex-table td {
+            padding: 5px;
+        }
+    </style>
 </head>
+
 <body>
 
 <section class="cover">
-    <h1>CO2nvert</h1>
-    <h2>Raport anual simplificat privind emisiile GES</h2>
-    <p>{{ company_name }}</p>
-    <p>Perioada de raportare: {{ reporting_period }}</p>
-    <p>Generat la: {{ generated_at }}</p>
-</section>
+    <div class="cover-bg"></div>
+    <div class="cover-image"></div>
+    <div class="cover-red-panel"></div>
+    <div class="cover-frame"></div>
 
-<section>
-    <h2>1. Rezumat executiv</h2>
-    <p>
-        Raportul centralizează emisiile calculate automat pe baza documentelor încărcate,
-        valorilor extrase prin OCR și factorilor de emisie configurați în aplicație.
-    </p>
+    <div class="brand">CO2nvert</div>
 
-    <div class="kpi">
-        <strong>Total emisii:</strong>
-        {{ total_co2e_tonnes }} tCO₂e
+    <div class="cover-content">
+        <h1>Raport privind<br>amprenta de<br>carbon</h1>
+
+        <div class="cover-line"></div>
+
+        <h2>An financiar {{ reporting_period }}</h2>
+        <p class="cover-period">01 Ian {{ reporting_period }} – 31 Dec {{ reporting_period }}</p>
+
+        <h3>{{ company_name }}</h3>
+
+        <div class="cover-note">
+            Generat automat pe baza<br>
+            documentelor procesate
+        </div>
     </div>
 </section>
 
-<section>
-    <h2>2. Emisii pe Scope</h2>
+<section class="page">
+    <h2 class="toc-title">Cuprins</h2>
+
+    <div class="toc-row"><a href="#introducere">Introducere</a><span>3</span></div>
+    <div class="toc-row"><a href="#categorii">Categorii de emisii</a><span>4</span></div>
+    <div class="toc-row"><a href="#total-emisii">Total emisii gaze cu efect de seră</a><span>5</span></div>
+    <div class="toc-row"><a href="#diagrame">Diagrame emisii</a><span>6</span></div>
+    <div class="toc-row"><a href="#metodologie">Metodologie calcul amprenta de carbon</a><span>8</span></div>
+    <div class="toc-row"><a href="#limitari">Limitări</a><span>9</span></div>
+    <div class="toc-row"><a href="#recomandari">Idei pentru reducerea amprentei de carbon</a><span>9</span></div>
+    <div class="toc-row"><a href="#anexa">Anexă tehnică</a><span>10</span></div>
+
+    <h3 style="margin-top: 36px;">Lista figurilor</h3>
+    <div class="toc-row"><span>Fig. 0 - Reprezentarea grafică a Scope 1, Scope 2 și Scope 3</span><span>4</span></div>
+    <div class="toc-row"><span>Fig. 1 - Distribuția emisiilor pe Scope</span><span>6</span></div>
+    <div class="toc-row"><span>Fig. 2 - Emisii pe tip activitate</span><span>6</span></div>
+    <div class="toc-row"><span>Fig. 3 - Total emisii Scope 1, 2 și 3</span><span>7</span></div>
+
+    <h3 style="margin-top: 36px;">Lista tabelelor</h3>
+    <div class="toc-row"><span>Tabel 1 - Total emisii gaze cu efect de seră</span><span>5</span></div>
+    <div class="toc-row"><span>Tabel 2 - Factori de emisie utilizați</span><span>8</span></div>
+</section>
+
+<section class="page" id="introducere">
+    <h2>Introducere</h2>
+
+    <p>
+        Prezentul raport centralizează emisiile de gaze cu efect de seră estimate pentru
+        <strong>{{ company_name }}</strong> în perioada de raportare <strong>{{ reporting_period }}</strong>.
+        Datele au fost obținute prin procesarea automată a documentelor încărcate,
+        extragerea valorilor relevante prin OCR și aplicarea factorilor de emisie configurați.
+    </p>
+
+    <p>
+        Scopul raportului este de a oferi o imagine sintetică asupra principalelor surse de emisii,
+        astfel încât compania să poată identifica zonele cu impact ridicat și să prioritizeze măsuri
+        de reducere a amprentei de carbon.
+    </p>
+
+    <p>
+        Emisiile sunt exprimate în echivalent dioxid de carbon, CO₂e, și sunt structurate conform
+        abordării Scope 1, Scope 2 și Scope 3, utilizată în raportarea conform GHG Protocol.
+    </p>
+
+    <div class="note">
+        {{ ai_summary }}
+    </div>
+
+    <p>
+        Raportul este realizat în conformitate cu metodologia GHG Protocol, un standard global
+        utilizat pentru cuantificarea și raportarea emisiilor de gaze cu efect de seră. Această
+        abordare permite clasificarea emisiilor în categorii relevante pentru managementul intern,
+        raportarea ESG și identificarea inițiativelor de reducere.
+    </p>
+
+    <h3>Interpretarea rezultatelor</h3>
+
+    <p>
+        Analiza emisiilor indică principalele surse de impact climatic ale companiei și oferă
+        o bază pentru luarea deciziilor strategice privind reducerea amprentei de carbon.
+    </p>
+
+    <p>
+        Identificarea distribuției emisiilor pe Scope permite prioritizarea intervențiilor:
+        emisiile directe (Scope 1), consumul energetic (Scope 2) și impactul extins al
+        lanțului valoric (Scope 3).
+    </p>
+
+    <div class="ghg-footer">
+        Pentru mai multe informații despre standardele utilizate, consultați:
+        <a href="https://ghgprotocol.org/about-us" target="_blank">
+            Greenhouse Gas Protocol (GHG Protocol)
+        </a>
+    </div>
+</section>
+
+<section class="page" id="categorii">
+    <h2>Categorii de emisii</h2>
+
+    {% if ghg_scope_image %}
+    <figure class="ghg-figure">
+        <img src="{{ ghg_scope_image }}" class="ghg-img">
+        <figcaption>
+            Fig. 0 - Reprezentarea grafică a Scope 1, Scope 2 și Scope 3 în lanțul valoric
+        </figcaption>
+    </figure>
+    {% endif %}
+
+    <div class="scope-block">
+        <strong>Scope 1</strong>
+        <p>
+            Include emisiile directe provenite din surse controlate de companie, precum combustibilul
+            utilizat de flotă, gazele naturale, combustibilii utilizați în echipamente sau alte surse
+            staționare aflate sub control operațional.
+        </p>
+    </div>
+
+    <div class="scope-block">
+        <strong>Scope 2</strong>
+        <p>
+            Include emisiile indirecte generate de energia achiziționată, precum electricitatea,
+            energia termică, aburul sau răcirea achiziționată. Aceste emisii sunt asociate consumului
+            energetic al companiei, chiar dacă producerea energiei are loc în afara organizației.
+        </p>
+    </div>
+
+    <div class="scope-block">
+        <strong>Scope 3</strong>
+        <p>
+            Include alte emisii indirecte din lanțul valoric, precum deșeuri, naveta angajaților,
+            călătorii de afaceri, bunuri și servicii achiziționate, transport, distribuție sau utilizarea
+            produselor vândute.
+        </p>
+    </div>
+</section>
+
+<section class="page" id="total-emisii">
+    <h2>Total emisii gaze cu efect de seră</h2>
+
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="label">Total emisii</div>
+            <div class="value">{{ total_co2e_tonnes }} tCO₂e</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Documente procesate</div>
+            <div class="value">{{ documents_count }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Activități identificate</div>
+            <div class="value">{{ activities_count }}</div>
+        </div>
+    </div>
 
     <table>
         <thead>
             <tr>
-                <th>Scope</th>
-                <th>kg CO₂e</th>
-                <th>t CO₂e</th>
+                <th>Categorie</th>
+                <th>Cantitate kgCO₂e</th>
+                <th>Cantitate tCO₂e</th>
+                <th>Pondere</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Scope 1 - Emisii directe</td>
+                <td>Scope 1</td>
                 <td>{{ by_scope.scope_1_kg }}</td>
                 <td>{{ by_scope.scope_1_tonnes }}</td>
+                <td>{{ by_scope.scope_1_percent }}%</td>
             </tr>
             <tr>
-                <td>Scope 2 - Energie achiziționată</td>
+                <td>Scope 2</td>
                 <td>{{ by_scope.scope_2_kg }}</td>
                 <td>{{ by_scope.scope_2_tonnes }}</td>
+                <td>{{ by_scope.scope_2_percent }}%</td>
             </tr>
             <tr>
-                <td>Scope 3 - Lanț valoric</td>
+                <td>Scope 3</td>
                 <td>{{ by_scope.scope_3_kg }}</td>
                 <td>{{ by_scope.scope_3_tonnes }}</td>
+                <td>{{ by_scope.scope_3_percent }}%</td>
+            </tr>
+            <tr class="total-row">
+                <td>Total</td>
+                <td>{{ total_co2e_kg | default("") }}</td>
+                <td>{{ total_co2e_tonnes }}</td>
+                <td>100%</td>
             </tr>
         </tbody>
     </table>
+
+    <p class="figure-caption">Tabel 1 - Total emisii gaze cu efect de seră</p>
 </section>
 
-<section>
-    <h2>3. Activități și calcule</h2>
+<section class="page" id="diagrame">
+    <h2>Diagrame emisii</h2>
+
+    <figure class="chart-card">
+        <img src="{{ charts.scope_pie }}" class="chart-img chart-img-big">
+        <figcaption>Fig. 1 - Distribuția emisiilor pe Scope</figcaption>
+    </figure>
+
+    <figure class="chart-card">
+        <img src="{{ charts.activity_bar }}" class="chart-img chart-img-big">
+        <figcaption>Fig. 2 - Emisii pe tip activitate</figcaption>
+    </figure>
+</section>
+
+<section class="page">
+    <h2>Comparație emisii</h2>
+
+    <figure class="chart-card">
+        <img src="{{ charts.scope_bar }}" class="chart-img chart-img-large">
+        <figcaption>Fig. 3 - Total emisii Scope 1, 2 și 3</figcaption>
+    </figure>
+</section>
+
+<section class="page" id="metodologie">
+    <h2>Metodologie calcul amprenta de carbon</h2>
+
+    <div class="methodology-box">
+        Formula generală utilizată:
+        <strong>Date de activitate × Factor de emisie = Emisii CO₂e</strong>
+    </div>
+
+    <p>
+        Calculul emisiilor se bazează pe datele de activitate extrase automat din documentele încărcate.
+        Pentru fiecare activitate identificată, aplicația normalizează unitatea de măsură, asociază
+        categoria de emisii relevantă și aplică factorul de emisie configurat în sistem.
+    </p>
+
+    <p>
+        În cazul în care valorile extrase au un scor de încredere redus, acestea sunt păstrate în raport,
+        dar trebuie verificate manual înainte de utilizarea rezultatelor în raportări oficiale sau decizii
+        strategice.
+    </p>
+
+    <h3>Scope 1</h3>
+    <p>
+        Pentru combustibili lichizi și gaze naturale, emisiile au fost calculate pe baza cantității
+        extrase din documente și a factorului de emisie specific activității.
+    </p>
+
+    <h3>Scope 2</h3>
+    <p>
+        Pentru energia electrică și energia termică achiziționată, calculul pornește de la
+        consumul exprimat în kWh sau MWh și aplică factorii de emisie corespunzători.
+    </p>
+
+    <h3>Scope 3</h3>
+    <p>
+        În această versiune a raportului, Scope 3 este inclus doar dacă există date încărcate
+        și procesate pentru categoriile relevante.
+    </p>
+
+    <h3>Factori de emisie utilizați</h3>
 
     <table>
         <thead>
             <tr>
-                <th>Document</th>
+                <th>Tip activitate</th>
+                <th>Factor emisii</th>
+                <th>Unitate factor</th>
+                <th>Formula</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factor in emission_factors %}
+            <tr>
+                <td>{{ factor.activity_type }}</td>
+                <td>{{ factor.emission_factor }}</td>
+                <td>{{ factor.emission_factor_unit }}</td>
+                <td>{{ factor.formula }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="figure-caption">Tabel 2 - Factori de emisie utilizați</p>
+</section>
+
+<section class="page" id="limitari">
+    <h2>Limitări</h2>
+
+    <ul>
+        {% for limitation in limitations %}
+        <li>{{ limitation }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2 id="recomandari" style="margin-top: 34px;">Idei pentru reducerea amprentei de carbon</h2>
+
+    <ul>
+        {% for recommendation in recommendations %}
+        <li>{{ recommendation }}</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="page" id="anexa">
+    <h2>Anexă tehnică</h2>
+
+    <p>
+        Această anexă include datele agregate utilizate pentru calculul raportului.
+        Numele fișierelor încărcate pot fi păstrate în sistem pentru trasabilitate și audit.
+    </p>
+
+    <table class="annex-table">
+        <thead>
+            <tr>
                 <th>Tip activitate</th>
                 <th>Scope</th>
                 <th>Cantitate</th>
                 <th>Unitate</th>
-                <th>Factor</th>
-                <th>Emisii kg CO₂e</th>
-                <th>Formula</th>
+                <th>Emisii tCO₂e</th>
+                <th>Încredere</th>
             </tr>
         </thead>
         <tbody>
             {% for row in activities %}
             <tr>
-                <td>{{ row.filename }}</td>
                 <td>{{ row.activity_type }}</td>
                 <td>Scope {{ row.scope }}</td>
                 <td>{{ row.quantity }}</td>
                 <td>{{ row.unit }}</td>
-                <td>{{ row.emission_factor }} {{ row.emission_factor_unit }}</td>
-                <td>{{ row.co2e_kg }}</td>
-                <td>{{ row.formula }}</td>
+                <td>{{ row.co2e_tonnes }}</td>
+                <td>{{ row.confidence }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</section>
 
-<section>
-    <h2>4. Documente justificative</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Fișier</th>
-                <th>Tip document</th>
-                <th>Status</th>
-                <th>Confidence OCR/AI</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for doc in documents %}
-            <tr>
-                <td>{{ doc.filename }}</td>
-                <td>{{ doc.document_type }}</td>
-                <td>{{ doc.status }}</td>
-                <td>{{ doc.confidence }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
-
-<section>
-    <h2>5. Metodologie</h2>
-    <p>
-        Calculul emisiilor este realizat pe baza formulei:
-        <strong>Date de activitate × Factor de emisie = Emisii CO₂e</strong>.
+    <p class="footer-note">
+        Raport generat automat de CO2nvert. Rezultatele trebuie verificate înainte de utilizare oficială.
     </p>
-    <p>
-        Raportul este structurat pentru monitorizare și raportare simplificată,
-        incluzând activitățile desfășurate, fluxurile de energie/combustibili,
-        cantitățile utilizate, factorii de emisie și documentele justificative.
-    </p>
-</section>
-
-<section>
-    <h2>6. Observații pentru verificare</h2>
-
-    {% if low_confidence_items %}
-        <p class="warning">
-            Există activități cu scor de încredere sub 80%. Se recomandă verificare manuală.
-        </p>
-
-        <ul>
-        {% for item in low_confidence_items %}
-            <li>{{ item.activity_type }} - {{ item.confidence }}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>Nu au fost identificate activități cu scor scăzut de încredere.</p>
-    {% endif %}
 </section>
 
 </body>

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, Depends
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Annotated  # Importăm Annotated
+from typing import List, Annotated
 
 from app.database import get_db
 from app.models import Batch, Document
@@ -11,22 +11,25 @@ router = APIRouter(prefix="/upload", tags=["Upload"])
 
 @router.post("/")
 async def upload_files(
-    # Annotated forțează Swagger să genereze input-ul de tip 'multipart/form-data'
     files: Annotated[List[UploadFile], File(description="Selectează fișierele pentru upload")],
     db: Session = Depends(get_db)
 ):
+    if not files:
+        raise HTTPException(status_code=400, detail="No files uploaded")
+
     batch = Batch(
         name="CO2nvert Upload Batch",
         status="uploaded"
     )
 
     db.add(batch)
-    db.commit()
-    db.refresh(batch)
+    db.flush()
 
     uploaded_documents = []
 
     for file in files:
+        print("UPLOAD RECEIVED:", file.filename, file.content_type)
+
         file_path, saved_filename = await save_file(file)
 
         document = Document(
@@ -39,16 +42,16 @@ async def upload_files(
         )
 
         db.add(document)
+        db.flush()
+
         uploaded_documents.append(document)
 
     db.commit()
 
-    for document in uploaded_documents:
-        db.refresh(document)
-
     return {
         "message": "Files uploaded successfully",
         "batch_id": batch.id,
+        "files_received_by_api": len(files),
         "files_uploaded": len(uploaded_documents),
         "documents": [
             {
