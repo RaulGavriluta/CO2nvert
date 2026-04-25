@@ -1,5 +1,6 @@
 import os
 import asyncio
+import base64
 from pathlib import Path
 from uuid import uuid4
 
@@ -13,6 +14,13 @@ TEMPLATE_DIR = BASE_DIR / "templates"
 REPORTS_DIR = Path("storage/reports")
 
 
+def image_to_data_uri(path: Path) -> str | None:
+    if not path.exists():
+        return None
+
+    encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
+    return f"data:image/png;base64,{encoded}"
+
 async def html_to_pdf(html_content: str, output_path: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -21,17 +29,18 @@ async def html_to_pdf(html_content: str, output_path: str):
         await page.set_content(html_content, wait_until="networkidle")
 
         await page.pdf(
-            path=output_path,
-            format="A4",
-            print_background=True,
-            prefer_css_page_size=True,
-            margin={
-                "top": "0mm",
-                "right": "0mm",
-                "bottom": "0mm",
-                "left": "0mm",
-            },
-        )
+    path=output_path,
+    format="A4",
+    print_background=True,
+    prefer_css_page_size=True,
+    outline=True,
+    margin={
+        "top": "0mm",
+        "right": "0mm",
+        "bottom": "0mm",
+        "left": "0mm",
+    },
+)
 
         await browser.close()
 
@@ -72,6 +81,10 @@ def prepare_report_context(context: dict) -> dict:
     context.setdefault("by_scope", {})
     context.setdefault("chart_scope_items", [])
     context.setdefault("chart_activity_items", [])
+
+    context["ghg_scope_image"] = image_to_data_uri(
+    Path("storage/assets/image.png")
+    )
 
     return context
 

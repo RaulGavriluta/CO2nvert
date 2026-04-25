@@ -18,8 +18,10 @@ def get_category_code(document_type: str) -> str:
 
     if document_type == "gas_invoice":
         return "scope_1_stationary_combustion"
+
     if document_type == "thermal_invoice":
         return "scope_2_purchased_heating_cooling_steam"
+
     return "unknown"
 
 
@@ -33,60 +35,111 @@ def extract_batch(batch_id: int, db: Session = Depends(get_db)):
     extracted_results = []
 
     for document in documents:
-        text = extract_text(document.file_path)
+        try:
+            text = extract_text(document.file_path)
 
-        document.extracted_text = text
-        document.document_type = detect_document_type(text)
+            document.extracted_text = text
+            document.document_type = detect_document_type(text)
 
-        activity_data = extract_activity_from_text(
-            text=text,
-            document_type=document.document_type
-        )
+            activity_data = extract_activity_from_text(
+                text=text,
+                document_type=document.document_type,
+            )
 
-        category_code = get_category_code(document.document_type)
+            if not activity_data:
+                document.status = "failed"
 
-        category = (
-            db.query(EmissionCategory)
-            .filter(EmissionCategory.code == category_code)
-            .first()
-        )
+                extracted_results.append({
+                    "document_id": document.id,
+                    "filename": document.filename,
+                    "document_type": document.document_type,
+                    "status": "failed",
+                    "error": "No activity extracted",
+                    "extracted_text_preview": text[:500] if text else "",
+                })
 
-        existing_activities = (
-            db.query(Activity)
-            .filter(Activity.document_id == document.id)
-            .all()
-        )
+                continue
 
-        for existing_activity in existing_activities:
-            db.delete(existing_activity)
+            category_code = get_category_code(document.document_type)
 
-        db.flush()
+            category = (
+                db.query(EmissionCategory)
+                .filter(EmissionCategory.code == category_code)
+                .first()
+            )
 
-        activity = Activity(
-            document_id=document.id,
-            category_id=category.id if category else None,
-            activity_type=activity_data["activity_type"],
-            scope=activity_data["scope"],
-            quantity=activity_data["quantity"],
-            unit=activity_data["unit"],
-            confidence=activity_data["confidence"]
-        )
+            existing_activities = (
+                db.query(Activity)
+                .filter(Activity.document_id == document.id)
+                .all()
+            )
 
-        db.add(activity)
-        document.status = "processed"
+            for existing_activity in existing_activities:
+                db.delete(existing_activity)
 
-        extracted_results.append({
-            "document_id": document.id,
-            "filename": document.filename,
-            "document_type": document.document_type,
-            "extracted_text_preview": text[:500],
-            "activity": activity_data
-        })
+            db.flush()
+
+            activity = Activity(
+                document_id=document.id,
+                category_id=category.id if category else None,
+                activity_type=activity_data.get("activity_type"),
+                scope=activity_data.get("scope"),
+                quantity=activity_data.get("quantity", 0.0),
+                unit=activity_data.get("unit"),
+                confidence=activity_data.get("confidence", 0.0),
+            )
+
+            db.add(activity)
+            db.flush()
+
+            document.status = "processed"
+
+            extracted_results.append({
+                "document_id": document.id,
+                "filename": document.filename,
+                "document_type": document.document_type,
+                "status": "processed",
+                "extracted_text_preview": text[:500] if text else "",
+                "activity": {
+                    "activity_id": activity.id,
+                    "activity_type": activity.activity_type,
+                    "scope": activity.scope,
+                    "quantity": activity.quantity,
+                    "unit": activity.unit,
+                    "confidence": activity.confidence,
+                },
+            })
+
+        except Exception as e:
+            document.status = "failed"
+
+            extracted_results.append({
+                "document_id": document.id,
+                "filename": document.filename,
+                "document_type": document.document_type,
+                "status": "failed",
+                "error": str(e),
+            })
+
+            continue
 
     db.commit()
+
+    processed_count = sum(
+        1 for result in extracted_results
+        if result.get("status") == "processed"
+    )
+
+    failed_count = sum(
+        1 for result in extracted_results
+        if result.get("status") == "failed"
+    )
 
     return {
         "message": "Extraction completed",
         "batch_id": batch_id,
-        "results": extracted_results
+        "documents_count": len(documents),
+        "processed_count": processed_count,
+        "failed_count": failed_count,
+        "results": extracted_results,
     }

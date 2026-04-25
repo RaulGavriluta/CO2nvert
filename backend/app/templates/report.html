@@ -199,6 +199,16 @@
             background: white;
             padding-left: 8px;
         }
+        .toc-row a {
+    color: #1f2937;
+    text-decoration: none;
+    background: white;
+    padding-right: 8px;
+}
+
+.toc-row a:hover {
+    color: #b91c1c;
+}
 
         .note {
             background: #fef3c7;
@@ -272,43 +282,36 @@
             margin-top: 8px;
         }
 
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-top: 20px;
-        }
-
         .chart-card {
-            border: 1px solid #e5e7eb;
-            padding: 16px;
-            background: white;
-            page-break-inside: avoid;
-        }
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    background: white;
+    page-break-inside: avoid;
+    margin: 18px 0 24px;
+}
 
-        .chart-card.full-width {
-            margin-top: 24px;
-        }
+.chart-img {
+    width: 100%;
+    object-fit: contain;
+    display: block;
+}
 
-        .chart-img {
-            width: 100%;
-            height: 260px;
-            object-fit: contain;
-            display: block;
-        }
+.chart-img-big {
+    height: 300px;
+}
 
-        .chart-img.large {
-            height: 360px;
-        }
+.chart-img-large {
+    height: 470px;
+}
 
-        figcaption {
-            margin-top: 10px;
-            text-align: center;
-            color: #b91c1c;
-            font-weight: bold;
-            font-style: italic;
-            font-size: 12px;
-        }
+figcaption {
+    margin-top: 10px;
+    text-align: center;
+    color: #b91c1c;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 12px;
+}
 
         .methodology-box {
             border-left: 4px solid #047857;
@@ -357,16 +360,32 @@
             padding: 5px;
         }
 
-        .scope-block {
-    border-left: 4px solid #b91c1c;
-    padding: 8px 12px;
-    margin: 12px 0;
-    background: #f9fafb;
+       .ghg-figure {
+    margin: 16px 0 14px;
+    page-break-inside: avoid;
+    text-align: center;
 }
 
-.scope-block strong {
-    color: #b91c1c;
+.ghg-img {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    display: block;
 }
+
+.scope-block {
+    border-left: 4px solid #b91c1c;
+    padding: 7px 12px;
+    margin: 8px 0;
+    background: #f9fafb;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.scope-block p {
+    margin-bottom: 0;
+}
+
     </style>
 </head>
 
@@ -400,14 +419,13 @@
 <section class="page">
     <h2 class="toc-title">Cuprins</h2>
 
-    <div class="toc-row"><span>Introducere</span><span>3</span></div>
-    <div class="toc-row"><span>Categorii de emisii</span><span>3</span></div>
-    <div class="toc-row"><span>Total emisii gaze cu efect de seră</span><span>4</span></div>
-    <div class="toc-row"><span>Diagrame emisii</span><span>5</span></div>
-    <div class="toc-row"><span>Metodologie calcul amprenta de carbon</span><span>6</span></div>
-    <div class="toc-row"><span>Limitări</span><span>7</span></div>
-    <div class="toc-row"><span>Idei pentru reducerea amprentei de carbon</span><span>7</span></div>
-    <div class="toc-row"><span>Anexă tehnică</span><span>8</span></div>
+    <div class="toc-row"><a href="#introducere">Introducere</a><span>3</span></div>
+<div class="toc-row"><a href="#total-emisii">Total emisii gaze cu efect de seră</a><span>4</span></div>
+<div class="toc-row"><a href="#diagrame">Diagrame emisii</a><span>5</span></div>
+<div class="toc-row"><a href="#metodologie">Metodologie calcul amprenta de carbon</a><span>6</span></div>
+<div class="toc-row"><a href="#limitari">Limitări</a><span>7</span></div>
+<div class="toc-row"><a href="#recomandari">Idei pentru reducerea amprentei de carbon</a><span>7</span></div>
+<div class="toc-row"><a href="#anexa">Anexă tehnică</a><span>8</span></div>
 
     <h3 style="margin-top: 36px;">Lista figurilor</h3>
     <div class="toc-row"><span>Fig. 1 - Distribuția emisiilor pe Scope</span><span>5</span></div>
@@ -419,7 +437,7 @@
     <div class="toc-row"><span>Tabel 2 - Factori de emisie utilizați</span><span>6</span></div>
 </section>
 
-<section class="page">
+<section class="page" id="introducere">
     <h2>Introducere</h2>
 
     <p>
@@ -445,6 +463,15 @@
     </div>
 
     <h2>Categorii de emisii</h2>
+
+    {% if ghg_scope_image %}
+    <figure class="ghg-figure">
+        <img src="{{ ghg_scope_image }}" class="ghg-img">
+        <figcaption>
+            Fig. 0 - Reprezentarea grafică a Scope 1, Scope 2 și Scope 3 în lanțul valoric
+        </figcaption>
+    </figure>
+    {% endif %}
 
     <div class="scope-block">
         <strong>Scope 1</strong>
@@ -474,7 +501,9 @@
     </div>
 </section>
 
-<section class="page">
+
+
+<section class="page" id="total-emisii">
     <h2>Total emisii gaze cu efect de seră</h2>
 
     <div class="kpi-grid">
@@ -532,28 +561,30 @@
     <p class="figure-caption">Tabel 1 - Total emisii gaze cu efect de seră</p>
 </section>
 
-<section class="page">
+<section class="page" id="diagrame">
     <h2>Diagrame emisii</h2>
 
-    <div class="chart-grid">
-        <figure class="chart-card">
-            <img src="{{ charts.scope_pie }}" class="chart-img">
-            <figcaption>Fig. 1 - Distribuția emisiilor pe Scope</figcaption>
-        </figure>
+    <figure class="chart-card">
+        <img src="{{ charts.scope_pie }}" class="chart-img chart-img-big">
+        <figcaption>Fig. 1 - Distribuția emisiilor pe Scope</figcaption>
+    </figure>
 
-        <figure class="chart-card">
-            <img src="{{ charts.activity_bar }}" class="chart-img">
-            <figcaption>Fig. 2 - Emisii pe tip activitate</figcaption>
-        </figure>
-    </div>
-
-    <figure class="chart-card full-width">
-        <img src="{{ charts.scope_bar }}" class="chart-img large">
-        <figcaption>Fig. 3 - Total emisii Scope 1, 2 și 3</figcaption>
+    <figure class="chart-card">
+        <img src="{{ charts.activity_bar }}" class="chart-img chart-img-big">
+        <figcaption>Fig. 2 - Emisii pe tip activitate</figcaption>
     </figure>
 </section>
 
 <section class="page">
+    <h2>Comparație emisii</h2>
+
+    <figure class="chart-card">
+        <img src="{{ charts.scope_bar }}" class="chart-img chart-img-large">
+        <figcaption>Fig. 3 - Total emisii Scope 1, 2 și 3</figcaption>
+    </figure>
+</section>
+
+<section class="page" id="metodologie">
     <h2>Metodologie calcul amprenta de carbon</h2>
 
     <div class="methodology-box">
@@ -605,7 +636,7 @@
     <p class="figure-caption">Tabel 2 - Factori de emisie utilizați</p>
 </section>
 
-<section class="page">
+<section class="page" id="limitari">
     <h2>Limitări</h2>
 
     <ul>
@@ -614,8 +645,7 @@
         {% endfor %}
     </ul>
 
-    <h2 style="margin-top: 34px;">Idei pentru reducerea amprentei de carbon</h2>
-
+<h2 id="recomandari" style="margin-top: 34px;">Idei pentru reducerea amprentei de carbon</h2>
     <ul>
         {% for recommendation in recommendations %}
         <li>{{ recommendation }}</li>
@@ -623,7 +653,7 @@
     </ul>
 </section>
 
-<section class="page">
+<section class="page" id="anexa">
     <h2>Anexă tehnică</h2>
 
     <p>
