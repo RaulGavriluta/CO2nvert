@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,7 +5,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
-from app.models import Batch, Document, Activity, Emission, Report
+from app.models import Batch, Document, Activity, Report
 from app.services.report_generator import generate_report_pdf
 from app.services.ai_report_writer import (
     generate_ai_summary,
@@ -22,6 +21,22 @@ def percent(value: float, total: float) -> float:
         return 0.0
 
     return round((value / total) * 100, 2)
+
+
+def build_bar_items(values: dict) -> list[dict]:
+    max_value = max(values.values()) if values else 1
+
+    if max_value == 0:
+        max_value = 1
+
+    return [
+        {
+            "name": name,
+            "value": round(value / 1000, 4),
+            "percent": round((value / max_value) * 100, 2),
+        }
+        for name, value in values.items()
+    ]
 
 
 @router.post("/generate/{batch_id}")
@@ -103,12 +118,15 @@ def generate_report(batch_id: int, db: Session = Depends(get_db)):
         "scope_3": total_scope_3,
     }
 
-    activity_breakdown_tonnes = {
-        key: round(value / 1000, 4)
-        for key, value in activity_breakdown.items()
-    }
-
     total_tonnes = round(total_co2e / 1000, 4)
+
+    chart_scope_items = build_bar_items({
+        "Scope 1": total_scope_1,
+        "Scope 2": total_scope_2,
+        "Scope 3": total_scope_3,
+    })
+
+    chart_activity_items = build_bar_items(activity_breakdown)
 
     context = {
         "company_name": batch.company_name,
@@ -138,6 +156,9 @@ def generate_report(batch_id: int, db: Session = Depends(get_db)):
         "activities": activity_rows,
         "emission_factors": factor_rows,
 
+        "chart_scope_items": chart_scope_items,
+        "chart_activity_items": chart_activity_items,
+
         "ai_summary": generate_ai_summary(
             total_tonnes=total_tonnes,
             by_scope=by_scope_for_ai,
@@ -150,24 +171,6 @@ def generate_report(batch_id: int, db: Session = Depends(get_db)):
             by_scope=by_scope_for_ai,
             activity_breakdown=activity_breakdown,
         ),
-        "chart_data": json.dumps({
-            "scopeLabels": ["Scope 1", "Scope 2", "Scope 3"],
-            "scopeValues": [
-                round(total_scope_1 / 1000, 4),
-                round(total_scope_2 / 1000, 4),
-                round(total_scope_3 / 1000, 4),
-            ],
-            "activityLabels": list(activity_breakdown_tonnes.keys()),
-            "activityValues": list(activity_breakdown_tonnes.values()),
-        }),
-        "chart_scope_values": json.dumps([
-            round(total_scope_1 / 1000, 4),
-            round(total_scope_2 / 1000, 4),
-            round(total_scope_3 / 1000, 4),
-        ]),
-
-        "chart_activity_labels": json.dumps(list(activity_breakdown_tonnes.keys())),
-        "chart_activity_values": json.dumps(list(activity_breakdown_tonnes.values())),
     }
 
     report_path = generate_report_pdf(context)
