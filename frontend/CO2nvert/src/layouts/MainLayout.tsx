@@ -10,47 +10,46 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
       
-      {/* 1. Top Navigation Bar (Bara verde pe toată lățimea) */}
+      {/* 1. Top Navigation Bar */}
       <header className="h-16 bg-emerald-600 text-white flex items-center justify-between px-6 shadow-md z-10 relative">
+        
         {/* Partea stângă: Logo și Nume */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="bg-white/20 p-2 rounded-lg">
             <Leaf className="text-white" size={24} />
           </div>
           <span className="text-xl font-bold tracking-tight">CO2nvert</span>
         </div>
 
-        {/* Partea dreaptă: Acțiuni Rapide și Profil Utilizator */}
-        <div className="flex items-center gap-6">
-          
-          {/* Buton rapid pentru încărcare date */}
+        {/* --- MODIFICARE: Butonul mutat în MIJLOC --- */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <NavLink 
             to="/upload" 
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg border border-emerald-400/30 active:scale-95"
           >
-            <UploadCloud size={18} />
+            <UploadCloud size={20} />
             <span>Încarcă Date</span>
           </NavLink>
-
-          {/* Profil */}
-          <div className="flex items-center gap-3 border-l border-emerald-500 pl-6">
-            <div className="text-right">
-              <p className="text-sm font-medium text-emerald-50">Utilizator Companie</p>
-              <p className="text-xs text-emerald-200">Green Corp S.A.</p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-white text-emerald-700 flex items-center justify-center font-bold shadow-sm">
-              GC
-            </div>
-          </div>
-
         </div>
+
+        {/* Partea dreaptă: Profil Utilizator */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-medium text-emerald-50">Utilizator Companie</p>
+            <p className="text-xs text-emerald-200">Green Corp S.A.</p>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-white text-emerald-700 flex items-center justify-center font-bold shadow-sm border border-emerald-100">
+            GC
+          </div>
+        </div>
+
       </header>
 
       {/* 2. Containerul de jos: Sidebar + Conținut Principal */}
       <div className="flex flex-1 overflow-hidden">
         
-        {/* Sidebar (Acum folosește NavLink pentru rute) */}
-        <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
           <nav className="flex-1 px-4 py-6 space-y-2">
             <NavItem icon={<BarChart3 size={20} />} label="Dashboard" to="/" />
             <NavItem icon={<FileText size={20} />} label="Rapoarte Anuale" to="/reports" />
@@ -58,7 +57,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </nav>
         </aside>
 
-        {/* Main Content (Aici se randează paginile) */}
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 max-w-6xl mx-auto w-full">
             {children}
@@ -70,7 +69,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   );
 };
 
-// Componenta actualizată pentru butoanele de meniu folosind NavLink
 const NavItem = ({ icon, label, to }: { icon: React.ReactNode, label: string, to: string }) => (
   <NavLink
     to={to}
